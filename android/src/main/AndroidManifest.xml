@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="com.flutter.flutter_aliyun_push">
+    <!-- 阿里云推送相关权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" /><!-- 手机识别码权限，用于生成设备唯一id -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /><!-- 接收推送主要权限 -->
+    <uses-permission android:name="android.permission.GET_TASKS" /><!-- 获取近期运行任务，用于应用是否活跃的判断 -->
+    <uses-permission android:name="android.permission.REORDER_TASKS" /><!-- 获取近期运行任务，用于应用是否活跃的判断 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <application
+        android:usesCleartextTraffic="true"
+        >
+        <meta-data android:name="com.alibaba.app.appkey" android:value="${aliyunPushAppKey}"/> <!-- 请填写你自己的- appKey -->
+        <meta-data android:name="com.alibaba.app.appsecret" android:value="${aliyunPushAppSecret}"/> <!-- 请填写你自己的appSecret -->
+    </application>
+</manifest>
