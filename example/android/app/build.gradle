@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.flutter.aliyunPush"
+        applicationId "com.flutter.aliPush"
         minSdkVersion 16
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
@@ -41,8 +41,17 @@ android {
 
 
         manifestPlaceholders = [
-                aliyunPushAppKey: "30543515",
-                aliyunPushAppSecret:"ee0268fd22fcfd66fb416163b235dd29"
+                aliyunPushAppKey: "30734536", //阿里云推送appkey
+                aliyunPushAppSecret:"0983be97e631d6ae01e666409a998921",//阿里云推送appsecret
+                miPushAppId:"123", //小米推送Appid
+                miPushAppKey:"456", //小米推送AppKey
+                huaweiPushAppId:"789", //华为推送AppId
+                vivoPushAppId:"012", //vivo推送AppId
+                vivoPushAppKey:"345", //vivo推送AppKey
+                oppoPushAppKey:"678", //oppo推送AppKey
+                oppoPushAppSecret:"901", //oppo推送AppKey
+                meizhuPushAppId:"234",  //魅族推送AppId
+                meizhuPushAppKey:"567",//魅族推送AppKey
         ]
 
 

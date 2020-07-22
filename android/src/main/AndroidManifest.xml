@@ -16,5 +16,39 @@
         >
         <meta-data android:name="com.alibaba.app.appkey" android:value="${aliyunPushAppKey}"/> <!-- 请填写你自己的- appKey -->
         <meta-data android:name="com.alibaba.app.appsecret" android:value="${aliyunPushAppSecret}"/> <!-- 请填写你自己的appSecret -->
+
+        <meta-data
+            android:name="com.huawei.hms.client.appid"
+            android:value="${huaweiPushAppId}" />
+
+        <meta-data
+            android:name="com.vivo.push.api_key"
+            android:value="${vivoPushAppKey}" />
+        <meta-data
+            android:name="com.vivo.push.app_id"
+            android:value="${vivoPushAppId}" />
+
+
+        <!-- 自定义，统一初始化 -->
+        <meta-data
+            android:name="com.mi.push.api_key"
+            android:value="${miPushAppKey}" />
+        <meta-data
+            android:name="com.mi.push.app_id"
+            android:value="${miPushAppId}" />
+
+        <meta-data
+            android:name="com.oppo.push.api_key"
+            android:value="${oppoPushAppKey}" />
+        <meta-data
+            android:name="com.oppo.push.app_secret"
+            android:value="${oppoPushAppSecret}" />
+
+        <meta-data
+            android:name="com.meizhu.push.api_key"
+            android:value="${meizhuPushAppKey}" />
+        <meta-data
+            android:name="com.meizhu.push.app_id"
+            android:value="${meizhuPushAppId}" />
     </application>
 </manifest>

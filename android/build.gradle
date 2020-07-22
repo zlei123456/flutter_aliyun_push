@@ -55,10 +55,15 @@ android {
 }
 
 dependencies {
-    implementation 'com.aliyun.ams:alicloud-android-push:3.1.9.1@aar'
-//    implementation 'com.aliyun.ams:alicloud-android-third-push:3.+@aar'
+
+    implementation 'com.aliyun.ams:alicloud-android-push:3.1.10@aar'
+    implementation'com.aliyun.ams:alicloud-android-third-push:3.1.0@aar'
     implementation 'com.aliyun.ams:alicloud-android-utdid:1.5.2'
     implementation 'com.aliyun.ams:alicloud-android-utils:1.1.6.4'
     implementation 'com.aliyun.ams:alicloud-android-ut:5.4.3'
     implementation 'com.aliyun.ams:alicloud-android-beacon:1.0.4.3'
+    implementation 'com.aliyun.ams:huawei-push:2.6.3.305'
+    implementation 'com.aliyun.ams:huawei-push-base:2.6.3.305'
+    implementation 'com.aliyun.ams:meizu-push:3.8.7.1'
+    implementation 'com.aliyun.ams:third_vivopush:2.9.0.1'
 }
