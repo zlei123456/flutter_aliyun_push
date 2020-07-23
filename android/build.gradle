@@ -68,4 +68,5 @@ dependencies {
     implementation 'com.aliyun.ams:third_vivopush:2.9.0.1'
 
     implementation 'org.greenrobot:eventbus:3.2.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
 }

@@ -57,6 +57,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
 
   @Subscribe()
   public void onMessageEvent(PushMessageEvent event) {
+    Log.d(FlutterAliyunPushPlugin.TAG, "onMessageEvent:"+event.eventName);
     if(aliyunPushPluginChannel == null) {
       return;
     }
@@ -67,7 +68,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
       aliyunPushPluginChannel.invokeMethod(event.eventName,(String)event.params);
     }else if(PushMessageEvent.EVENT_onReceiverMessage.equals(event.eventName)) {
       //接受消息
-      aliyunPushPluginChannel.invokeMethod(event.eventName,event.params);
+      aliyunPushPluginChannel.invokeMethod(event.eventName,event.getParamsJSONString());
     }
   };
 
