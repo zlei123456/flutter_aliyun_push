@@ -9,6 +9,8 @@ class FlutterAliyunPush {
 
   static Function onRegistSuccess;
   static Function onRegistError;
+  static Function onReceiveNotification;
+  static Function onReceiveMessage;
 
   static Future<String> get platformVersion async {
     final String version = await _channel.invokeMethod('getPlatformVersion');
@@ -41,6 +43,16 @@ class FlutterAliyunPush {
             onRegistError(call.arguments);
           }
           break;
+        case "onReceiverNotification":
+          if(onReceiveNotification != null) {
+            onReceiveNotification(call.arguments);
+          }
+          break;
+        case "onReceiverMessage":
+          if(onReceiveMessage != null) {
+            onReceiveMessage(call.arguments);
+          }
+          break;
       }
     });
   }
@@ -53,6 +65,16 @@ class FlutterAliyunPush {
 
   static void  reigistOnRegistError(Function callback) {
     onRegistError = callback;
+    registCallHandler();
+  }
+
+  static void  reigistOnReceiveNotification(Function callback) {
+    onReceiveNotification = callback;
+    registCallHandler();
+  }
+
+  static void  reigistOnReceiveMessage(Function callback) {
+    onReceiveMessage = callback;
     registCallHandler();
   }
 }
