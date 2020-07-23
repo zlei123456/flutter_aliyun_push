@@ -20,22 +20,21 @@ import com.alibaba.sdk.android.push.register.MiPushRegister;
 import com.alibaba.sdk.android.push.register.OppoRegister;
 import com.alibaba.sdk.android.push.register.VivoRegister;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.PluginRegistry;
-import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.common.StandardMethodCodec;
 
 public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.MethodCallHandler {
 
-  public static FlutterAliyunPushPlugin instance;
   public static final String TAG = "AliyunPushPlugin";
   public static final String CHANNEL_NAME="aliyun_push";
   private Context context;
@@ -43,25 +42,56 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
   private MethodChannel aliyunPushPluginChannel;
   private static String lastPushRegistSuccessMessage;
   private static String lastPushRegistErrorMessage;
+  private static boolean isPluginAttached; //插件是否被加载到flutter
+  private static List<FlutterPushNotification> cachedNotifications = new ArrayList<FlutterPushNotification>(); //未传到dart的消息
+  private static List<FlutterPushMessage> cachedMessages = new ArrayList<FlutterPushMessage>(); //未传到dart的消息
 
   public MethodChannel getAliyunPushPluginChannel() {
     return aliyunPushPluginChannel;
   }
 
-  public FlutterAliyunPushPlugin() {}
+  public FlutterAliyunPushPlugin() {
 
-  public static void registerWith(PluginRegistry.Registrar registrar) {
-    if (instance == null) {
-      instance = new FlutterAliyunPushPlugin();
+  }
+
+
+  @Subscribe()
+  public void onMessageEvent(PushMessageEvent event) {
+    if(aliyunPushPluginChannel == null) {
+      return;
     }
-    instance.onAttachedToEngine(registrar.context(), registrar.messenger());
+    if(PushMessageEvent.EVENT_onPushRegistSuccess.equals(event.eventName)
+      || PushMessageEvent.EVENT_onPushRegistError.equals(event.eventName)
+    ) {
+      //初始化
+      aliyunPushPluginChannel.invokeMethod(event.eventName,(String)event.params);
+    }else if(PushMessageEvent.EVENT_onReceiverMessage.equals(event.eventName)) {
+      //接受消息
+      aliyunPushPluginChannel.invokeMethod(event.eventName,event.params);
+    }
+  };
+
+
+  public static void sendPushNotification(FlutterPushNotification message) {
+    if(FlutterAliyunPushPlugin.isPluginAttached) {
+      EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onReceiverNotification,message));
+    }else {
+      Log.d(FlutterAliyunPushPlugin.TAG, "message recevie not plugin not attach");
+      cachedNotifications.add(message);
+    }
+  }
+
+  public static void sendPushMessage(FlutterPushMessage message) {
+    if(FlutterAliyunPushPlugin.isPluginAttached) {
+      EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onReceiverMessage,message));
+    }else {
+      Log.d(FlutterAliyunPushPlugin.TAG, "message recevie not plugin not attach");
+      cachedMessages.add(message);
+    }
   }
 
   public static void initPush(Context context) {
     Log.i(TAG, "start initPush");
-    if (instance == null) {
-      instance = new FlutterAliyunPushPlugin();
-    }
     PushServiceFactory.init(context);
     initPushVersion(context);
     CloudPushService pushService = PushServiceFactory.getCloudPushService();
@@ -70,8 +100,8 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
       public void onSuccess(String response) {
         Log.d(FlutterAliyunPushPlugin.TAG, "init cloudchannel success");
         synchronized (initializationLock) {
-          if(instance.getAliyunPushPluginChannel() != null) {
-            instance.getAliyunPushPluginChannel().invokeMethod("onPushRegistSuccess",response);
+          if(FlutterAliyunPushPlugin.isPluginAttached) {
+            EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onPushRegistSuccess,response));
           }else {
             Log.d(FlutterAliyunPushPlugin.TAG, "instance.aliyunPushPluginChannel null");
             lastPushRegistSuccessMessage = response;
@@ -83,8 +113,8 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
       @Override
       public void onFailed(String errorCode, String errorMessage) {
         Log.d(FlutterAliyunPushPlugin.TAG, "init cloudchannel failed -- errorcode:" + errorCode + " -- errorMessage:" + errorMessage);
-        if(instance.getAliyunPushPluginChannel() != null) {
-          instance.getAliyunPushPluginChannel().invokeMethod("onPushRegistError",errorMessage);
+        if(FlutterAliyunPushPlugin.isPluginAttached) {
+          EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onPushRegistError,errorMessage));
         }else {
           lastPushRegistErrorMessage = errorMessage;
           lastPushRegistSuccessMessage = null;
@@ -180,12 +210,16 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding binding) {
+    FlutterAliyunPushPlugin.isPluginAttached = true;
+    EventBus.getDefault().register(this);
     onAttachedToEngine(binding.getApplicationContext(), binding.getBinaryMessenger());
   }
 
   @Override
   public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     Log.i(TAG, "onDetachedFromEngine");
+    FlutterAliyunPushPlugin.isPluginAttached = false;
+    EventBus.getDefault().unregister(this);
     context = null;
     aliyunPushPluginChannel.setMethodCallHandler(null);
     aliyunPushPluginChannel = null;
@@ -209,17 +243,37 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
       // Android/Flutter communication.
       aliyunPushPluginChannel.setMethodCallHandler(this);
 
-      if(lastPushRegistSuccessMessage != null) {
-        Log.i(TAG, "invokeMethod:"+ "onPushRegistSuccess");
-        aliyunPushPluginChannel.invokeMethod("onPushRegistSuccess",lastPushRegistSuccessMessage);
-        lastPushRegistSuccessMessage = null;
-      }else if(lastPushRegistErrorMessage != null) {
-        Log.i(TAG, "invokeMethod:"+ "onPushRegistError");
-        aliyunPushPluginChannel.invokeMethod("onPushRegistError",lastPushRegistErrorMessage);
-        lastPushRegistErrorMessage = null;
-      }
+      dealCacheEvent();
+
 //      aliyunPushPluginChannel.invokeMethod("onPushInit",null);
 
+    }
+  }
+
+  private void dealCacheEvent() {
+    if(lastPushRegistSuccessMessage != null) {
+      Log.i(TAG, "invokeMethod:"+ "onPushRegistSuccess");
+      aliyunPushPluginChannel.invokeMethod("onPushRegistSuccess",lastPushRegistSuccessMessage);
+      lastPushRegistSuccessMessage = null;
+    }else if(lastPushRegistErrorMessage != null) {
+      Log.i(TAG, "invokeMethod:"+ "onPushRegistError");
+      aliyunPushPluginChannel.invokeMethod("onPushRegistError",lastPushRegistErrorMessage);
+      lastPushRegistErrorMessage = null;
+    }
+
+    //传递缓存的消息到dart
+    if(cachedNotifications.size() > 0) {
+      for (FlutterPushNotification message : cachedNotifications) {
+        aliyunPushPluginChannel.invokeMethod(PushMessageEvent.EVENT_onReceiverNotification,message);
+      }
+      cachedNotifications.clear();
+    }
+
+    if(cachedMessages.size() > 0) {
+      for (FlutterPushMessage message : cachedMessages) {
+        aliyunPushPluginChannel.invokeMethod(PushMessageEvent.EVENT_onReceiverNotification,message);
+      }
+      cachedMessages.clear();
     }
   }
 

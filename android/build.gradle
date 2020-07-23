@@ -66,4 +66,6 @@ dependencies {
     implementation 'com.aliyun.ams:huawei-push-base:2.6.3.305'
     implementation 'com.aliyun.ams:meizu-push:3.8.7.1'
     implementation 'com.aliyun.ams:third_vivopush:2.9.0.1'
+
+    implementation 'org.greenrobot:eventbus:3.2.0'
 }

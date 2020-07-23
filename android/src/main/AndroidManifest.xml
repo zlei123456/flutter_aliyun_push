@@ -50,5 +50,20 @@
         <meta-data
             android:name="com.meizhu.push.app_id"
             android:value="${meizhuPushAppId}" />
+
+
+        <receiver
+            android:name="com.flutter.flutter_aliyun_push.FlutterMessageReceiver"
+            android:exported="false"> <!-- 为保证receiver安全，建议设置不可导出，如需对其他应用开放可通过android：permission进行限制 -->
+            <intent-filter>
+                <action android:name="com.alibaba.push2.action.NOTIFICATION_OPENED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.alibaba.push2.action.NOTIFICATION_REMOVED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.alibaba.sdk.android.push.RECEIVE" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
