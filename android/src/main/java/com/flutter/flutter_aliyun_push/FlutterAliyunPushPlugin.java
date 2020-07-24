@@ -66,7 +66,8 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
     ) {
       //初始化
       aliyunPushPluginChannel.invokeMethod(event.eventName,(String)event.params);
-    }else if(PushMessageEvent.EVENT_onReceiverMessage.equals(event.eventName)) {
+    }else if(PushMessageEvent.EVENT_onReceiverMessage.equals(event.eventName)
+    || PushMessageEvent.EVENT_onReceiverNotification.equals(event.eventName)) {
       //接受消息
       aliyunPushPluginChannel.invokeMethod(event.eventName,event.getParamsJSONString());
     }

@@ -1,6 +1,10 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'push_message.dart';
+
+typedef OnReceiveMessage = Function(PushMessage);
+typedef OnReceiveNotification = Function(PushNotification);
 
 class FlutterAliyunPush {
   static const MethodChannel _channel =
@@ -9,8 +13,8 @@ class FlutterAliyunPush {
 
   static Function onRegistSuccess;
   static Function onRegistError;
-  static Function onReceiveNotification;
-  static Function onReceiveMessage;
+  static OnReceiveNotification onReceiveNotification;
+  static OnReceiveMessage onReceiveMessage;
 
   static Future<String> get platformVersion async {
     final String version = await _channel.invokeMethod('getPlatformVersion');
@@ -45,12 +49,20 @@ class FlutterAliyunPush {
           break;
         case "onReceiverNotification":
           if(onReceiveNotification != null) {
-            onReceiveNotification(call.arguments);
+            var param = call.arguments;
+            if(param != null) {
+              param = PushNotification.fromJson(json.decode(param));
+            }
+            onReceiveNotification(param);
           }
           break;
         case "onReceiverMessage":
           if(onReceiveMessage != null) {
-            onReceiveMessage(call.arguments);
+            var param = call.arguments;
+            if(param != null) {
+              param = PushMessage.fromJson(json.decode(param));
+            }
+            onReceiveMessage(param);
           }
           break;
       }
@@ -68,12 +80,12 @@ class FlutterAliyunPush {
     registCallHandler();
   }
 
-  static void  reigistOnReceiveNotification(Function callback) {
+  static void  reigistOnReceiveNotification(OnReceiveNotification callback) {
     onReceiveNotification = callback;
     registCallHandler();
   }
 
-  static void  reigistOnReceiveMessage(Function callback) {
+  static void  reigistOnReceiveMessage(OnReceiveMessage callback) {
     onReceiveMessage = callback;
     registCallHandler();
   }

@@ -36,10 +36,23 @@ class _MyAppState extends State<MyApp> {
 
     FlutterAliyunPush.reigistOnRegistSuccess((msg){
       platformVersion = msg;
+      setState(() {
+        _platformVersion = platformVersion;
+      });
     });
 
     FlutterAliyunPush.reigistOnReceiveNotification((msg){
       platformVersion = msg.title;
+      setState(() {
+        _platformVersion = platformVersion;
+      });
+    });
+
+    FlutterAliyunPush.reigistOnReceiveMessage((msg){
+      platformVersion = msg.title;
+      setState(() {
+        _platformVersion = platformVersion;
+      });
     });
 
     // If the widget was removed from the tree while the asynchronous platform
