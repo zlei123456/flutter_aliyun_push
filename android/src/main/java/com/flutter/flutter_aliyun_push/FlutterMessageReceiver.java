@@ -20,7 +20,7 @@ public class FlutterMessageReceiver extends MessageReceiver {
         message.title = title;
         message.summary = summary;
         message.extraMap = extraMap;
-        FlutterAliyunPushPlugin.sendPushNotification(message);
+        FlutterAliyunPushPlugin.sendPushNotification(context,message);
     }
     @Override
     public void onMessage(Context context, CPushMessage cPushMessage) {
@@ -32,7 +32,7 @@ public class FlutterMessageReceiver extends MessageReceiver {
         message.messageId = cPushMessage.getMessageId();
         message.content = cPushMessage.getContent();
         message.traceInfo = cPushMessage.getTraceInfo();
-        FlutterAliyunPushPlugin.sendPushMessage(message);
+        FlutterAliyunPushPlugin.sendPushMessage(context,message);
 
     }
     @Override

@@ -37,7 +37,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
 
   public static final String TAG = "AliyunPushPlugin";
   public static final String CHANNEL_NAME="aliyun_push";
-  private Context context;
+  private static Context mContext;
   public static Object initializationLock = new Object();
   private MethodChannel aliyunPushPluginChannel;
   private static String lastPushRegistSuccessMessage;
@@ -74,7 +74,14 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
   };
 
 
-  public static void sendPushNotification(FlutterPushNotification message) {
+  public static void sendPushNotification(Context context,FlutterPushNotification message) {
+    if (mContext == null) {
+      //app未启动，厂家通道
+      Log.d(TAG,"showNotification:"+message.title);
+      NotificationUtil.showNotification(context,message.title,message.summary,message.summary);
+      return;
+    }
+
     if(FlutterAliyunPushPlugin.isPluginAttached) {
       EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onReceiverNotification,message));
     }else {
@@ -83,7 +90,13 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
     }
   }
 
-  public static void sendPushMessage(FlutterPushMessage message) {
+  public static void sendPushMessage(Context context,FlutterPushMessage message) {
+    if (mContext == null) {
+      //app未启动，厂家通道
+      Log.d(TAG,"showNotification:"+message.title);
+      NotificationUtil.showNotification(context,message.title,message.content,message.content);
+      return;
+    }
     if(FlutterAliyunPushPlugin.isPluginAttached) {
       EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onReceiverMessage,message));
     }else {
@@ -94,6 +107,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
 
   public static void initPush(Context context) {
     Log.i(TAG, "start initPush");
+    mContext = context;
     PushServiceFactory.init(context);
     initPushVersion(context);
     CloudPushService pushService = PushServiceFactory.getCloudPushService();
@@ -123,6 +137,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
         }
       }
     });
+    initThirdPush(context);
   }
 
   /**
@@ -222,7 +237,6 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
     Log.i(TAG, "onDetachedFromEngine");
     FlutterAliyunPushPlugin.isPluginAttached = false;
     EventBus.getDefault().unregister(this);
-    context = null;
     aliyunPushPluginChannel.setMethodCallHandler(null);
     aliyunPushPluginChannel = null;
   }
@@ -235,7 +249,6 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
       }
 
       Log.i(TAG, "onAttachedToEngine");
-      this.context = applicationContext;
 
       aliyunPushPluginChannel =
               new MethodChannel(

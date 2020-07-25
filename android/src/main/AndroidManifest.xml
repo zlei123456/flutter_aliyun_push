@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.REORDER_TASKS" /><!-- 获取近期运行任务，用于应用是否活跃的判断 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
         android:usesCleartextTraffic="true"
         >

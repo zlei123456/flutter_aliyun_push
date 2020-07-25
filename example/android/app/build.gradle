@@ -43,8 +43,8 @@ android {
         manifestPlaceholders = [
                 aliyunPushAppKey: "30849262", //阿里云推送appkey
                 aliyunPushAppSecret:"a302e75da52a91910b5cbf01854791b1",//阿里云推送appsecret
-                miPushAppId:"2882303761517669764", //小米推送Appid
-                miPushAppKey:"5691766985764", //小米推送AppKey
+                miPushAppId:"\\2882303761517669764", //小米推送Appid
+                miPushAppKey:"\\5691766985764", //小米推送AppKey
                 huaweiPushAppId:"", //华为推送AppId
                 vivoPushAppId:"", //vivo推送AppId
                 vivoPushAppKey:"", //vivo推送AppKey
