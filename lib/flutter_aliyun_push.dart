@@ -21,10 +21,6 @@ class FlutterAliyunPush {
     return version;
   }
 
-  static Future<String> get initPush async {
-    final String version = await _channel.invokeMethod('initPush');
-    return version;
-  }
 
   /**
    * 注册原生调用dart
@@ -67,6 +63,7 @@ class FlutterAliyunPush {
           break;
       }
     });
+    _channel.invokeMethod('initPush');
   }
 
   static void  reigistOnRegistSuccess(Function callback) {

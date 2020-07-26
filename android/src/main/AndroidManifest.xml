@@ -32,6 +32,16 @@
 
         <!-- 自定义，统一初始化 -->
         <meta-data
+            android:name="com.flutter.push.channelId"
+            android:value="${pushChannelId}" />
+        <meta-data
+            android:name="com.flutter.push.channelName"
+            android:value="${pushChannelName}" />
+        <meta-data
+            android:name="com.flutter.push.channeDescrition"
+            android:value="${pushChannelDescrition}" />
+
+        <meta-data
             android:name="com.mi.push.api_key"
             android:value="${miPushAppKey}" />
         <meta-data
@@ -52,6 +62,12 @@
             android:name="com.meizhu.push.app_id"
             android:value="${meizhuPushAppId}" />
 
+
+        <activity android:name="com.flutter.flutter_aliyun_push.PopupPushActivity"
+            android:exported="true"
+            android:theme="@style/TranslucentActivity"
+            >
+        </activity>
 
         <receiver
             android:name="com.flutter.flutter_aliyun_push.FlutterMessageReceiver"

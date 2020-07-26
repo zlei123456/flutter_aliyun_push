@@ -43,15 +43,18 @@ android {
         manifestPlaceholders = [
                 aliyunPushAppKey: "30849262", //阿里云推送appkey
                 aliyunPushAppSecret:"a302e75da52a91910b5cbf01854791b1",//阿里云推送appsecret
-                miPushAppId:"\\2882303761517669764", //小米推送Appid
-                miPushAppKey:"\\5691766985764", //小米推送AppKey
-                huaweiPushAppId:"", //华为推送AppId
-                vivoPushAppId:"", //vivo推送AppId
-                vivoPushAppKey:"", //vivo推送AppKey
-                oppoPushAppKey:"", //oppo推送AppKey
-                oppoPushAppSecret:"", //oppo推送AppKey
-                meizhuPushAppId:"",  //魅族推送AppId
-                meizhuPushAppKey:"",//魅族推送AppKey
+                pushChannelId:"\\1", //安卓8.0后推送需指定渠道id，后台发送推送需要指定相同值（配置中纯数字需要加\\反斜线）
+                pushChannelName:"channelname", //安卓8.0后推送需指定用户可以看到的通知渠道的名字.，后台发送推送需要指定相同值（配置中纯数字需要加\\反斜线）
+                pushChannelDescrition:"channeldesc", //安卓8.0后推送需指定用户可以看到的通知渠道的描述.，后台发送推送需要指定相同值（配置中纯数字需要加\\反斜线）
+                miPushAppId:"\\2882303761517669764", //小米推送Appid （配置中纯数字需要加\\反斜线）
+                miPushAppKey:"\\5691766985764", //小米推送AppKey （配置中纯数字需要加\\反斜线）
+                huaweiPushAppId:"", //华为推送AppId （配置中纯数字需要加\\反斜线）
+                vivoPushAppId:"", //vivo推送AppId （配置中纯数字需要加\\反斜线）
+                vivoPushAppKey:"", //vivo推送AppKey （配置中纯数字需要加\\反斜线）
+                oppoPushAppKey:"", //oppo推送AppKey （配置中纯数字需要加\\反斜线）
+                oppoPushAppSecret:"", //oppo推送AppKey （配置中纯数字需要加\\反斜线）
+                meizhuPushAppId:"",  //魅族推送AppId （配置中纯数字需要加\\反斜线）
+                meizhuPushAppKey:"",//魅族推送AppKey （配置中纯数字需要加\\反斜线）
         ]
 
 

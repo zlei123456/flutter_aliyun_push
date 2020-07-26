@@ -8,6 +8,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
@@ -43,6 +44,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
   private static String lastPushRegistSuccessMessage;
   private static String lastPushRegistErrorMessage;
   private static boolean isPluginAttached; //插件是否被加载到flutter
+  private static boolean isFlutterInvokeInitPush; //flutter是否调用了初始化方法，用来判断flutter是否已经添加了method监听
   private static List<FlutterPushNotification> cachedNotifications = new ArrayList<FlutterPushNotification>(); //未传到dart的消息
   private static List<FlutterPushMessage> cachedMessages = new ArrayList<FlutterPushMessage>(); //未传到dart的消息
 
@@ -75,28 +77,15 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
 
 
   public static void sendPushNotification(Context context,FlutterPushNotification message) {
-    if (mContext == null) {
-      //app未启动，厂家通道
-      Log.d(TAG,"showNotification:"+message.title);
-      NotificationUtil.showNotification(context,message.title,message.summary,message.summary);
-      return;
-    }
-
     if(FlutterAliyunPushPlugin.isPluginAttached) {
       EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onReceiverNotification,message));
     }else {
-      Log.d(FlutterAliyunPushPlugin.TAG, "message recevie not plugin not attach");
+      Log.d(FlutterAliyunPushPlugin.TAG, "notification recevie not plugin not attach");
       cachedNotifications.add(message);
     }
   }
 
   public static void sendPushMessage(Context context,FlutterPushMessage message) {
-    if (mContext == null) {
-      //app未启动，厂家通道
-      Log.d(TAG,"showNotification:"+message.title);
-      NotificationUtil.showNotification(context,message.title,message.content,message.content);
-      return;
-    }
     if(FlutterAliyunPushPlugin.isPluginAttached) {
       EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onReceiverMessage,message));
     }else {
@@ -105,11 +94,15 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
     }
   }
 
+  /**
+   * 该方法必须在Appcation onCreate中被执行，否则推送会有问题
+   * @param context
+   */
   public static void initPush(Context context) {
     Log.i(TAG, "start initPush");
     mContext = context;
     PushServiceFactory.init(context);
-    initPushVersion(context);
+    initThirdPush(context);
     CloudPushService pushService = PushServiceFactory.getCloudPushService();
     pushService.register(context, new CommonCallback() {
       @Override
@@ -137,7 +130,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
         }
       }
     });
-    initThirdPush(context);
+
   }
 
   /**
@@ -157,6 +150,12 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
     if(appInfo == null) {
       return;
     }
+
+    String pushChannelId =  appInfo.metaData.getString("com.flutter.push.channelId");
+    String pushChannelName =  appInfo.metaData.getString("com.flutter.push.channelName");
+    String pushChanneDescription =  appInfo.metaData.getString("com.flutter.push.channeDescrition");
+    initPushVersion(context, pushChannelId,pushChannelName,pushChanneDescription);
+
     config.miPushAppId = appInfo.metaData.getString("com.mi.push.app_id");
     config.miPushAppKey = appInfo.metaData.getString("com.mi.push.api_key");
 
@@ -198,16 +197,16 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
 
   }
 
-  private static void initPushVersion(Context context) {
+  private static void initPushVersion(Context context,String channelId,String channelName,String channelDescription) {
 //    GcmRegister.register(this, "851061211440", "api-8646462459812937352-2848");
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
       // 通知渠道的id
-      String id = "1";
+      String id = channelId;
       // 用户可以看到的通知渠道的名字.
-      CharSequence name = "notification channel";
+      CharSequence name = channelName;
       // 用户可以看到的通知渠道的描述
-      String description = "notification description";
+      String description = channelDescription;
       int importance = NotificationManager.IMPORTANCE_HIGH;
       NotificationChannel mChannel = new NotificationChannel(id, name, importance);
       // 配置通知渠道的属性
@@ -266,6 +265,17 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
   }
 
   private void dealCacheEvent() {
+    if(!FlutterAliyunPushPlugin.isFlutterInvokeInitPush) {
+      //等待，直到dart有监听了执行
+      new Handler().postDelayed(new Runnable() {
+        @Override
+        public void run() {
+          dealCacheEvent();
+        }
+      },1000);
+      return;
+    }
+
     if(lastPushRegistSuccessMessage != null) {
       Log.i(TAG, "invokeMethod:"+ "onPushRegistSuccess");
       aliyunPushPluginChannel.invokeMethod("onPushRegistSuccess",lastPushRegistSuccessMessage);
@@ -276,17 +286,23 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
       lastPushRegistErrorMessage = null;
     }
 
+    dealOfflineMessage();
+  }
+
+  private void dealOfflineMessage() {
     //传递缓存的消息到dart
     if(cachedNotifications.size() > 0) {
+      Log.i(TAG, "invokeMethod cachedNotifications");
       for (FlutterPushNotification message : cachedNotifications) {
-        aliyunPushPluginChannel.invokeMethod(PushMessageEvent.EVENT_onReceiverNotification,message);
+        aliyunPushPluginChannel.invokeMethod(PushMessageEvent.EVENT_onReceiverNotification,message.getParamsJSONString());
       }
       cachedNotifications.clear();
     }
 
     if(cachedMessages.size() > 0) {
+      Log.i(TAG, "invokeMethod cachedMessages");
       for (FlutterPushMessage message : cachedMessages) {
-        aliyunPushPluginChannel.invokeMethod(PushMessageEvent.EVENT_onReceiverNotification,message);
+        aliyunPushPluginChannel.invokeMethod(PushMessageEvent.EVENT_onReceiverNotification,message.getParamsJSONString());
       }
       cachedMessages.clear();
     }
@@ -302,8 +318,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
         // This message is sent when the Dart side of this plugin is told to initialize.
         result.success("Android " + android.os.Build.VERSION.RELEASE);
       }else if(method.equals("initPush")) {
-//        initPush(this.context);
-
+        isFlutterInvokeInitPush = true;
       }
       else {
         result.notImplemented();

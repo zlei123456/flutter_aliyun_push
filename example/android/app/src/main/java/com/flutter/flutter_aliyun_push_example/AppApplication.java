@@ -1,6 +1,7 @@
 package com.flutter.flutter_aliyun_push_example;
 
 
+
 import com.flutter.flutter_aliyun_push.FlutterAliyunPushPlugin;
 
 import io.flutter.Log;
