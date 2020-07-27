@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -35,21 +37,21 @@ class _MyAppState extends State<MyApp> {
     }
 
     FlutterAliyunPush.reigistOnRegistSuccess((msg){
-      platformVersion = msg;
-      setState(() {
-        _platformVersion = platformVersion;
-      });
+//      platformVersion = msg;
+//      setState(() {
+//        _platformVersion = platformVersion;
+//      });
     });
 
     FlutterAliyunPush.reigistOnReceiveNotification((msg){
-      platformVersion = msg.title;
+      platformVersion = json.encode(msg.toJson());
       setState(() {
         _platformVersion = platformVersion;
       });
     });
 
     FlutterAliyunPush.reigistOnReceiveMessage((msg){
-      platformVersion = msg.title;
+      platformVersion = json.encode(msg.toJson());
       setState(() {
         _platformVersion = platformVersion;
       });

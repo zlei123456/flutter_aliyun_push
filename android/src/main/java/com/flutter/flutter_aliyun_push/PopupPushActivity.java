@@ -39,13 +39,23 @@ public class PopupPushActivity extends AndroidPopupActivity {
     protected void onSysNoticeOpened(String title, String summary, Map<String, String> extMap) {
         Log.d(TAG,"OnMiPushSysNoticeOpened, title: " + title + ", content: " + summary + ", extMap: " + extMap);
 
+        if(FlutterAliyunPushPlugin.isPluginAttached) {
+            finish();
+        }
+
         FlutterPushNotification notification = new FlutterPushNotification();
         notification.title = title;
         notification.summary = summary;
         notification.extraMap = extMap;
         FlutterAliyunPushPlugin.sendPushNotification(getApplicationContext(),notification);
+        if(FlutterAliyunPushPlugin.isPluginAttached) {
+            return;
+        }
+
         Intent intent = getPackageManager().getLaunchIntentForPackage(getPackageName());
         startActivity(intent);
         finish();
     }
+
+
 }

@@ -43,8 +43,8 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
   private MethodChannel aliyunPushPluginChannel;
   private static String lastPushRegistSuccessMessage;
   private static String lastPushRegistErrorMessage;
-  private static boolean isPluginAttached; //插件是否被加载到flutter
-  private static boolean isFlutterInvokeInitPush; //flutter是否调用了初始化方法，用来判断flutter是否已经添加了method监听
+  public static boolean isPluginAttached; //插件是否被加载到flutter
+  public static boolean isFlutterInvokeInitPush; //flutter是否调用了初始化方法，用来判断flutter是否已经添加了method监听
   private static List<FlutterPushNotification> cachedNotifications = new ArrayList<FlutterPushNotification>(); //未传到dart的消息
   private static List<FlutterPushMessage> cachedMessages = new ArrayList<FlutterPushMessage>(); //未传到dart的消息
 
@@ -77,7 +77,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
 
 
   public static void sendPushNotification(Context context,FlutterPushNotification message) {
-    if(FlutterAliyunPushPlugin.isPluginAttached) {
+    if(FlutterAliyunPushPlugin.isFlutterInvokeInitPush) {
       EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onReceiverNotification,message));
     }else {
       Log.d(FlutterAliyunPushPlugin.TAG, "notification recevie not plugin not attach");
@@ -86,7 +86,7 @@ public class FlutterAliyunPushPlugin implements FlutterPlugin, MethodChannel.Met
   }
 
   public static void sendPushMessage(Context context,FlutterPushMessage message) {
-    if(FlutterAliyunPushPlugin.isPluginAttached) {
+    if(FlutterAliyunPushPlugin.isFlutterInvokeInitPush) {
       EventBus.getDefault().post(new PushMessageEvent(PushMessageEvent.EVENT_onReceiverMessage,message));
     }else {
       Log.d(FlutterAliyunPushPlugin.TAG, "message recevie not plugin not attach");
